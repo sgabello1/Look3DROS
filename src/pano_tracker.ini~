@@ -1,0 +1,46 @@
+[video]
+; this is for camera control settings
+source=0
+brightness=30
+autoexposure=0
+exposure=40
+gain=50
+shutter=255
+viewthreshold=0.3333
+
+[camera_logitech]
+; logitech webcam 640x480
+width=640
+height=480
+fx=534.0903889198829
+fy=532.7169903918536
+cx=310.6034783637331
+cy=238.5619564935319
+k1=0.0601927861398604
+k2=-0.1716116480895861
+
+[camera]
+; FireFly MV
+width=640
+height=480
+fx=606.9783850066542
+fy=608.5636160810556
+cx=329.0883849012152
+cy=240.9498031221482
+k1=-0.367846464948389
+k2=0.1578975499985091
+
+[tracker]
+scales = 4
+ncc = 0.8*0.8
+start_level = 2
+motionmodel = 1
+debug_mode = 1
+speed = 2
+
+[modelmaker]
+threading=false
+match_threshold=0.7
+localizer_threading=true
+feature_detection=CULI
+
