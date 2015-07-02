@@ -8,9 +8,31 @@
 #include <opencv2/imgproc/imgproc.hpp>
 
 #include <look3d/track/plane_tracker.h>
+#include "sensor_msgs/Image.h"
+#include <opencv2/opencv.hpp>
+#include <cv_bridge/cv_bridge.h>
+#include <sensor_msgs/image_encodings.h>
+
 //#include "config.h"
 
+#include "ros/ros.h"
+
 using namespace std;
+using namespace cv;
+using namespace look3d;
+
+bool token = false;
+bool stop = false;
+int id = 0;
+
+Mat imageCamera;
+cv_bridge::CvImagePtr cv_ptr;
+PlaneTracker tracker;
+
+
+void on_mouse( int e, int x, int y, int d, void *ptr )
+{//for now just keep it
+}
 
 // Gets current projection matrix (= PerspectiveMatrix * CameraPoseMatrix)
 Eigen::Matrix<double, 3, 4> get_projection(look3d::PlaneTracker& tracker) {
@@ -61,86 +83,23 @@ void draw_target(cv::Mat& rgb_img, look3d::PlaneTracker& tracker) {
            cv::Point(pointz_cam[0], pointz_cam[1]), cv::Scalar(255, 0, 0), 3);
 }
 
-using namespace look3d;
-int main(int argc, char ** argv){
+void receivedImage(const sensor_msgs::Image::ConstPtr& img)
+{
+    if(token ){
+    try
+    {
 
-  const std::string data_path =
-      std::string("/home/sgabello/look3d/data/plane_sequence");
-  const std::string filename = "fusion_recorder.txt";
+    token = false;
+    cv_ptr = cv_bridge::toCvCopy(img, sensor_msgs::image_encodings::BGR8);
+    imageCamera=cv_ptr->image; // fire fly
 
-  const std::string fn = data_path + "/" + filename;
-  std::ifstream ifs(fn.c_str());
-  if (ifs.fail()) {
-    printf("Cannot open file:%s\n", fn.c_str());
-    return -1;
-  }
-
-  /// load images sequence
-  std::vector<cv::Mat> recorded_frames;
-  while(!ifs.eof()) {
-    std::string tag, img_fn;
-    double t;
-    ifs >> tag >> t >> img_fn;
-    img_fn  = data_path + "/" + img_fn;
-  printf("Read image from: %s\n", img_fn.c_str());
-    recorded_frames.push_back(cv::imread(img_fn, -1));
-  }
-  
-     /// initialize camera capture
-  cv::VideoCapture capture;
-#ifdef ANDROID
-  if (!capture.open(CV_CAP_ANDROID + 0)) {
-    LOGE("ERROR: Cannot open cv::VideoCapture");
-    return -1;
-  }
-#else
-  if (!capture.open(0)) {
-    printf("ERROR: Cannot open cv::VideoCapture\n");
-    return -1;
-  }
-#endif
-  capture.set(CV_CAP_PROP_FRAME_WIDTH, 640);
-  capture.set(CV_CAP_PROP_FRAME_HEIGHT, 480);
-
-  /// initialize the tracker
-  // remember to put plane_target.png in the ini file
-  const std::string config_file =
-      std::string("/home/sgabello/0catkin_ws/src/look3d_ros/src/plane_tracker.ini");
-
-  PlaneTracker tracker;
-
-  if(! tracker.Configure(config_file))
-  {
-  		printf("Some problems with config file \n");
-  		return -1;
-  }
-
-
-  tracker.RestartTracker();
-
-  bool stop = false;
-  int id = 0;
-  while (!stop) {
-    id = (id >= recorded_frames.size()-1) ? 0 : id + 1;
-    cv::Mat& color_img = recorded_frames[id];
-    static cv::Mat gray_img;
-    cv::cvtColor(color_img, gray_img, CV_BGR2GRAY);
+    cv::Mat gray_img;
+    cv::cvtColor(imageCamera, gray_img, CV_BGR2GRAY);
     PlaneTracker::TrackResult res = tracker.Track(gray_img);
     std::cout << "Tracking result:" << tracker.TrackResultToStr(res) << std::endl;
 
-    cv::Mat cloned_img = color_img.clone();
+    cv::Mat cloned_img = imageCamera.clone();
     draw_target(cloned_img, tracker);
-
-    /*while (!stop) {
-    static cv::Mat color_img;
-    capture.read(color_img);
-    static cv::Mat gray_img;
-    cv::cvtColor(color_img, gray_img, CV_BGR2GRAY);
-    PlaneTracker::TrackResult res = tracker.Track(gray_img);
-    std::cout << "Tracking result:" << tracker.TrackResultToStr(res) << std::endl;
-
-    cv::Mat cloned_img = color_img.clone();
-    draw_target(cloned_img, tracker);*/
 
     cv::imshow("Panoramic Tracker", cloned_img);
 
@@ -153,8 +112,53 @@ int main(int argc, char ** argv){
       id = 0;
       tracker.RestartTracker();
       break;
+      }
     }
+    catch (cv_bridge::Exception& e)
+    {
+      ROS_ERROR("cv_bridge exception: %s", e.what());
+      return;
+    }
+  
+     
+    imshow("Camera", imageCamera);
+    setMouseCallback("Camera",on_mouse, NULL );
+    token = true;
+
+    }
+}
+
+using namespace look3d;
+int main(int argc, char ** argv){
+
+  /// initialize the tracker
+  // remember to put plane_target.png in the ini file
+  const std::string config_file =
+      std::string("/home/sgabello/0catkin_ws/src/look3d_ros/src/plane_tracker.ini");
+
+  ros::init(argc, argv, "spatialar_ros");
+
+  ros::NodeHandle n;
+
+  ros::Subscriber sub_image = n.subscribe("/image_rect_color", 3, receivedImage);
+
+  if(! tracker.Configure(config_file))
+  {
+      printf("Some problems with config file \n");
+      return -1;
+  }
+ 
+  tracker.RestartTracker();
+
+  int key = 0;
+  token = true;
+
+  while((char)key != 'q' )
+  {
+    key = cvWaitKey(10);
+    ros::spinOnce();
   }
 
   return 0;
+  
 }

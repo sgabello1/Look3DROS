@@ -49,11 +49,14 @@ debug_mode = 1
 
 [target]
 ; planar target used for tracking
-target=/home/sgabello/catkin_ws/src/look3d_ros/src/plane_target.png
+;target=/home/sgabello/catkin_ws/src/look3d_ros/src/plane_target.png
+target=/home/sgabello/0catkin_ws/src/look3d_ros/src/hipster.png
 ; target width (e.x.: in meter unit)
-width=0.247
+;width=0.247
+width=0.370
 ; target height
-height=0.160
+;height=0.160
+height=0.247
 
 [modelmaker]
 threading=false
