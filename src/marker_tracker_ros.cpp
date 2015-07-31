@@ -21,6 +21,7 @@ using namespace std;
 using namespace cv;
 using namespace look3d;
 
+/*
 bool token = false;
 bool stop = false;
 int id = 0;
@@ -131,38 +132,42 @@ void receivedImage(const sensor_msgs::Image::ConstPtr& img)
     token = true;
 
     }
-}
+}*/
 
 using namespace look3d;
 int main(int argc, char ** argv){
 
+  std::string conf = argv[1];
+  cout << " Seiscemo o lo fai?! " << conf << endl;
+
+
   /// initialize the tracker
   // remember to put plane_target.png in the ini file
   const std::string config_file =
-      std::string("/home/sgabello/0catkin_ws/src/look3d_ros/src/plane_tracker.ini");
+      std::string("/home/sgabello/catkin_ws/src/look3d_ros/src/plane_tracker.ini");
 
-  ros::init(argc, argv, "spatialar_ros");
+  // ros::init(argc, argv, "spatialar_ros");
 
-  ros::NodeHandle n;
+  // ros::NodeHandle n;
 
-  ros::Subscriber sub_image = n.subscribe("/image_rect_color", 3, receivedImage);
+  // ros::Subscriber sub_image = n.subscribe("/image_rect_color", 3, receivedImage);
 
-  if(! tracker.Configure(config_file))
-  {
-      printf("Some problems with config file \n");
-      return -1;
-  }
+  // if(! tracker.Configure(config_file))
+  // {
+  //     printf("Some problems with config file \n");
+  //     return -1;
+  // }
  
-  tracker.RestartTracker();
+  // tracker.RestartTracker();
 
-  int key = 0;
-  token = true;
+  // int key = 0;
+  // token = true;
 
-  while((char)key != 'q' )
-  {
-    key = cvWaitKey(10);
-    ros::spinOnce();
-  }
+  // while((char)key != 'q' )
+  // {
+  //   key = cvWaitKey(10);
+  //   ros::spinOnce();
+  // }
 
   return 0;
   

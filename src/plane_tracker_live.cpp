@@ -134,7 +134,7 @@ int main(int argc, char ** argv){
   /// initialize the tracker
   // remember to put plane_target.png in the ini file
   const std::string config_file =
-      std::string("/home/sgabello/0catkin_ws/src/look3d_ros/src/plane_tracker.ini");
+      std::string("/home/sgabello/catkin_ws/src/look3d_ros/src/plane_tracker.ini");
 
   ros::init(argc, argv, "spatialar_ros");
 
