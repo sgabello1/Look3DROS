@@ -1,6 +1,10 @@
 <?xml version="1.0"?>
 <package>
+<<<<<<< HEAD
   <name>ros_look3d</name>
+=======
+  <name>look3d_ros</name>
+>>>>>>> 5a52b0cd679e0566eb478fffd6757ffd1daabf3e
   <version>0.0.0</version>
   <description>The look3d_ros package</description>
   <maintainer email="sgabello@todo.todo">sgabello</maintainer>
